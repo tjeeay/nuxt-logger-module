@@ -1,0 +1,6 @@
+import createLogger from '<%=options.factory %>'
+
+const options = <%= JSON.stringify(options) %>
+delete options.factory
+
+createLogger(options)
