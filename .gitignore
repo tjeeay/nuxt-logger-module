@@ -60,3 +60,4 @@ typings/
 DESIGN.md
 
 .vscode/
+dist/

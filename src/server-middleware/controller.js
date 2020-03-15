@@ -33,7 +33,7 @@ export default {
     })
   },
 
-  record({ req, res }, next) {
+  record({ req, res }) {
     if (req.method !== 'POST') {
       res.writeHead(501, 'only support POST')
       return res.end()
@@ -57,11 +57,17 @@ export default {
 
       try {
         const data = JSON.parse(body)
-        log = `${data.page} ${data.statusCode} "${userAgent}" ${ip}`
 
-        delete data.page
-        delete data.statusCode
-        delete data.userAgent
+        log = data.message || ''
+        delete data.message
+
+        if (data.page) {
+          log += `${data.page} ${data.statusCode}`
+          delete data.page
+          delete data.statusCode
+        }
+
+        log += `"${userAgent}" ${ip}`
 
         if (Object.keys(data).length > 0) {
           log += EOL

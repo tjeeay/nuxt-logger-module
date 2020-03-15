@@ -4,7 +4,7 @@ import createServerLogger from './server'
 import loggerMiddleware from './server-middleware'
 
 const defaults = {
-  clientLogger: path.resolve(__dirname, 'client.js'),
+  clientLogger: path.resolve(__dirname, '../dist/client.js'),
   serverLogger: path.resolve(__dirname, 'server.js'),
 }
 
