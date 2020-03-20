@@ -40,7 +40,14 @@ export default function(moduleOptions) {
   convertToRelativePath(serverOptions, 'factory', buildPath, srcPath)
   convertToRelativePath(serverOptions, 'logsDir', buildPath, srcPath)
 
-  serverOptions.logsDir = path.resolve(buildPath, serverOptions.logsDir)
+  // fix absolute path
+  serverOptions.logsDir = serverOptions.logsDir.startsWith('~')
+    ? serverOptions.logsDir
+    : path.join('~', serverOptions.logsDir)
+  serverOptions.logsDir = path.relative(
+    path.resolve(buildPath),
+    path.resolve(serverOptions.logsDir.replace('~', this.options.buildDir)),
+  )
 
   // create if logs directory is not exists
   if (!fs.existsSync(serverOptions.logsDir)) {
