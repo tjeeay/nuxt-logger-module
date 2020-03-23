@@ -4,8 +4,8 @@ import createServerLogger from './server'
 import loggerMiddleware from './server-middleware'
 
 const defaults = {
-  clientLogger: path.resolve(__dirname, '../dist/client.js'),
-  serverLogger: path.resolve(__dirname, 'server.js'),
+  clientLogger: 'nuxt-logger-module/dist/client.js',
+  serverLogger: 'nuxt-logger-module/src/server.js',
 }
 
 export default function(moduleOptions) {
@@ -26,28 +26,16 @@ export default function(moduleOptions) {
   }
 
   const srcPath = path.resolve(this.options.srcDir)
-  const buildPath = path.resolve(this.options.buildDir)
 
-  function convertToRelativePath(target, prop, from, to) {
+  function convertToRelativePath(target, prop, baseDir) {
     if (!path.isAbsolute(target[prop]) && !target[prop].startsWith('~')) {
       target[prop] = path.join('~', target[prop])
     }
-    target[prop] = path.relative(from, target[prop].replace('~', to))
+    target[prop] = path.relative(baseDir, target[prop].replace('~', baseDir))
     target[prop] = target[prop].split(/[\\/]/g).join(path.posix.sep)
   }
 
-  convertToRelativePath(clientOptions, 'factory', buildPath, srcPath)
-  convertToRelativePath(serverOptions, 'factory', buildPath, srcPath)
-  convertToRelativePath(serverOptions, 'logsDir', buildPath, srcPath)
-
-  // fix absolute path
-  serverOptions.logsDir = serverOptions.logsDir.startsWith('~')
-    ? serverOptions.logsDir
-    : path.join('~', serverOptions.logsDir)
-  serverOptions.logsDir = path.relative(
-    path.resolve(buildPath),
-    path.resolve(serverOptions.logsDir.replace('~', this.options.buildDir)),
-  )
+  convertToRelativePath(serverOptions, 'logsDir', srcPath)
 
   // create if logs directory is not exists
   if (!fs.existsSync(serverOptions.logsDir)) {
