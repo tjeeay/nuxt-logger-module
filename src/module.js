@@ -55,17 +55,21 @@ export default function(moduleOptions) {
     handler: loggerMiddleware(serverOptions),
   })
 
-  // register ready, close hooks
-  const hooks = ['ready', 'close']
-  hooks.forEach(hook => {
-    this.nuxt.hook(hook, () => {
-      global.$logger.info(`nuxt ${hook}.`)
-    })
-  })
-
+  const serverPluginFile = 'generated.plugin.logger.server.js'
   this.addPlugin({
     src: path.resolve(__dirname, 'plugin.template'),
-    fileName: 'logger.client.js',
+    fileName: serverPluginFile,
+    ssr: true,
+    options: {
+      ...options,
+      ...serverOptions,
+    },
+  })
+
+  const clientPluginFile = 'generated.plugin.logger.client.js'
+  this.addPlugin({
+    src: path.resolve(__dirname, 'plugin.template'),
+    fileName: clientPluginFile,
     ssr: false,
     options: {
       ...options,
@@ -73,13 +77,27 @@ export default function(moduleOptions) {
     },
   })
 
-  this.addPlugin({
-    src: path.resolve(__dirname, 'plugin.template'),
-    fileName: 'logger.server.js',
-    ssr: true,
-    options: {
-      ...options,
-      ...serverOptions,
-    },
-  })
+
+  // register nuxt hooks
+  this.addModule([path.resolve(__dirname, './submodules/hooks.listener.js')], true)
+
+  // extend plugins order: recommend put logger plugin to the first
+  const originExtendPlugins = this.options.extendPlugins || (plugins => plugins)
+  this.options.extendPlugins = function(plugins) {
+    const newPlugins = originExtendPlugins(plugins)
+
+    const serverPluginIndex = newPlugins.findIndex(p => (p.src || p).endsWith(serverPluginFile))
+    const clientPluginIndex = newPlugins.findIndex(p => (p.src || p).endsWith(clientPluginFile))
+
+    const serverPlugin = newPlugins[serverPluginIndex]
+    const clientPlugin = newPlugins[clientPluginIndex]
+    
+    newPlugins.splice(serverPluginIndex, 1)
+    newPlugins.splice(clientPluginIndex, 1)
+    newPlugins.unshift(serverPlugin, clientPlugin)
+
+    return newPlugins
+  }
 }
+
+module.exports.meta = require('../package.json')

@@ -16,7 +16,6 @@ npm install nuxt-logger-module
 
 {
   modules: [
-    // recommend add to the first
     'nuxt-logger-module'
   ]
 }

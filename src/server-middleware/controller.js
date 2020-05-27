@@ -62,12 +62,12 @@ export default {
         delete data.message
 
         if (data.page) {
-          log += `${data.page} ${data.statusCode}`
+          log += ` ${data.page} ${data.statusCode}`
           delete data.page
           delete data.statusCode
         }
 
-        log += `"${userAgent}" ${ip}`
+        log += ` "${userAgent}" ${ip}`
 
         if (Object.keys(data).length > 0) {
           log += EOL
